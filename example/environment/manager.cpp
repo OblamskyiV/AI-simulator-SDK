@@ -51,6 +51,8 @@ void Manager::action()
 
 void Manager::loadConfiguration(QString configurationFile)
 {
+    srand(static_cast<unsigned int>(time(0)));
+
     // Load file contents (without commented strings) to configStringList
     QFile config(QString("robots/") + configurationFile);
     QStringList configStringList = QStringList();
@@ -104,6 +106,13 @@ void Manager::loadConfiguration(QString configurationFile)
             return;
         }
 
+        // Check if size is a number and is over than zero
+        int size = objectParams.at(2).toInt();
+        if (size <= 0) {
+            std::cout << "Invalid size (object " << obj << " )";
+            return;
+        }
+
         // Check object start position
         QString pos = objectParams.at(1);
         if (!pos.contains(QRegExp("^(\\d)+;(\\d)+$")) && pos != QString("-1;-1")) {
@@ -130,18 +139,10 @@ void Manager::loadConfiguration(QString configurationFile)
             }
         } else {
 
-            srand(static_cast<unsigned int>(time(0)));
-            x = rand() % mapSize.first;
-            y = rand() % mapSize.second;
+            x = size + rand() % (mapSize.first - size);
+            y = size + rand() % (mapSize.second - size);
             std::cout << "Object " << obj <<
                          " receives random coordinates ( " << x << ", " << y << " )";
-        }
-
-        // Check if size is a number and is over than zero
-        int size = objectParams.at(2).toInt();
-        if (size <= 0) {
-            std::cout << "Invalid size (object " << obj << " )";
-            return;
         }
 
         // Check intersection type
