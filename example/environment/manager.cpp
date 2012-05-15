@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QDebug>
 #include <iostream>
+#include <time.h>
 #include <cmath>
 #include "manager.h"
 
@@ -39,11 +40,11 @@ void Manager::action()
 
         if (object->getCoords().first < mapSize.first - 2000
                 && object->getCoords().second < mapSize.second - 2000) {
-            if (object->getSize() <= 2000)
-                object->changeDiameter(object->getSize() + 5);
 
-            object->move(object->getCoords().first + 100,
-                         object->getCoords().second + 100);
+            if (!object->move(object->getCoords().first,
+                              object->getCoords().second))
+                object->changeDiameter(0);
+
         }
     }
 }
@@ -205,7 +206,7 @@ void Manager::checkForStateChanges()
         MessageBump *m = static_cast<MessageBump *>(msg);
         unsigned int object = m->envObjID;
         for (unsigned int i = 0; i < envObjects.size(); i++) {
-            if (envObjects.at(i) != NULL && envObjects.at(i)->getObjectId() + 1 == object) {
+            if ((envObjects.at(i) != NULL) && ((envObjects.at(i)->getObjectId() + 1) == object)) {
                 envObjects.at(i)->receiveBump(m);
             }
         }

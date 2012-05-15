@@ -61,7 +61,7 @@ bool EnvObject::move(int x, int y)
 
     Message *msg = NULL;
     msg = waitForMessage();
-    if (msg && msg->type == MsgBump && msg->envObjID == objectId + 1) {
+    if (msg && msg->type == MsgBump && (msg->envObjID == (objectId + 1))) {
         MessageBump *m = static_cast<MessageBump *>(msg);
         coords = std::pair<int, int>(m->coordX, m->coordY);
         return false;
