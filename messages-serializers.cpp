@@ -3,7 +3,7 @@
 void setupHeader(Message *msg, QDataStream &stream)
 {
     // version: 2
-    stream << static_cast<quint8>(2);
+    stream << static_cast<quint8>(3);
     // other header infortmation
     stream << static_cast<quint32>(msg->num)
            << static_cast<quint8>(msg->envObjID)

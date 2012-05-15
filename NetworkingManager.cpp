@@ -81,7 +81,7 @@ Message* NetworkingManager::receive()
 
     quint8 version;
     stream >> version;
-    if(version != 2) {
+    if(version != 3) {
         // FIXME: stick qDebug in here
         // VERSION MISMATCH, CAN'T HANDLE THAT
 
@@ -101,10 +101,11 @@ Message* NetworkingManager::receive()
         msg = new MessageBump();
         MessageBump *m = static_cast<MessageBump *>(msg);
 
-        quint32 x, y;
-        stream >> x >> y;
+        quint32 x, y, objectSize;
+        stream >> x >> y >> objectSize;
         m->coordX = x;
         m->coordY = y;
+        m->objectSize = objectSize;
         };
         break;
 

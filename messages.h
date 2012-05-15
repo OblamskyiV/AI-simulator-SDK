@@ -37,7 +37,7 @@ class MessageBump : public Message
 public:
     MessageBump() { type = MsgBump; }
 
-    unsigned int coordX, coordY;
+    unsigned int coordX, coordY, objectSize;
 };
 
 class MessageTurn : public Message
