@@ -15,6 +15,8 @@ Manager::Manager(QObject *parent, QString configurationFile) :
 
     configurationLoaded = false;
     loadConfiguration(configurationFile);
+
+
 }
 
 void Manager::run()
@@ -35,7 +37,7 @@ void Manager::action()
     //TODO: replace the code below by yours
 
     if(robot->getState() != Started)
-          return;
+        return;
 
     srand(static_cast<unsigned>(time(0)));
 
@@ -57,7 +59,8 @@ void Manager::action()
         else
             y = y1 - part;
         double x = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
-        robot->move(static_cast<int>(x), static_cast<int>(y));
+        if(!robot->move(static_cast<int>(x), static_cast<int>(y)))
+            robot->changeDiameter(robot->getSize());
     }
 }
 
@@ -168,6 +171,7 @@ void Manager::loadConfiguration(QString configurationFile)
     robot->turn(orientation);
     robot->changeDiameter(size);
     robot->changeColor(color.red(), color.green(), color.blue());
+    robot->setVisibilityRadius(visibilityRadius);
 
     for (int i = 0; i < CUSTOM_PARAMETERS_QUANTITY; i++) {
         robot->setParameter(i, parameters[i].second);

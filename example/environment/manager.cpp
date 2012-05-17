@@ -39,11 +39,13 @@ void Manager::action()
         //TODO: implement action for each object
 
         if (object->getCoords().first < mapSize.first - 2000
-                && object->getCoords().second < mapSize.second - 2000) {
+                && object->getCoords().second < mapSize.second - 2000
+                ) {
 
-            if (!object->move(object->getCoords().first,
-                              object->getCoords().second))
-                object->changeDiameter(0);
+//            if (!object->move(object->getCoords().first,
+//                              object->getCoords().second)) {
+//                object->changeDiameter(0);
+//            }
 
         }
     }
