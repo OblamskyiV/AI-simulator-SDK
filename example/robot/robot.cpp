@@ -5,6 +5,7 @@ Robot::Robot():
     color(255, 255, 255),
     size(0),
     orientation(0),
+    visibilityRadius(0),
     intersection(AllowedForSameColor),
     coords(0, 0),
     state(Started)
@@ -15,6 +16,7 @@ Robot::Robot():
         char symbol = static_cast<char>(65 + i);
         parameters[i] = std::pair<std::string, double>(&symbol, 0);
     }
+
     network = NULL;
 }
 
@@ -53,6 +55,10 @@ bool Robot::move(int x, int y)
     if (msg && msg->type == MsgBump) {
         MessageBump *m = static_cast<MessageBump *>(msg);
         coords = std::pair<int, int>(m->coordX, m->coordY);
+        if (size > m->objectSize)
+            size += m->objectSize / 2;
+        else
+            size = 0;
         return false;
     } else {
         delete msg;
@@ -107,7 +113,6 @@ std::vector<MessageObject> Robot::whoIsThere(unsigned int x, unsigned int y, uns
     msg = waitForMessage();
     if (msg && msg->type == MsgThereYouSee) {
         MessageThereYouSee *m = static_cast<MessageThereYouSee *>(msg);
-        //results.resize(m->objects.size());
         std::vector<MessageObject>::iterator it;
         for(it = m->objects.begin(); it < m->objects.end(); it++)
             results.push_back(*it);

@@ -44,8 +44,6 @@ void Manager::action()
         if (objects.size() == 0)
             return;
 
-        std::cout << "Robot sees " << objects.size() << " objects\n";
-
         const int size = objects.size() + 1;    //add robot's position
         if (size >= 2) {
             MessageObject me;
@@ -72,31 +70,7 @@ void Manager::action()
             }
 
             AlgorithmSolver *solver = new AlgorithmSolver(costMatrix, size);
-
-
-//            path.push_back(QPair<int, int>(4, 6));
-//            path.push_back(QPair<int, int>(1, 5));
-//            path.push_back(QPair<int, int>(5, 10));
-//            path.push_back(QPair<int, int>(10, 1));
-//            path.push_back(QPair<int, int>(6, 9));
-//            path.push_back(QPair<int, int>(8, 7));
-//            path.push_back(QPair<int, int>(9, 8));
-//            path.push_back(QPair<int, int>(0, 4));
-//            path.push_back(QPair<int, int>(3, 2));
-//            path.push_back(QPair<int, int>(2, 0));
-//            path.push_back(QPair<int, int>(7, 3));
-
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
-                    printf("%7.2f | ", costMatrix[i][j]);
-                }
-                printf("\n");
-            }
-
-//            exit(0);
             path = solver->solve();
-            qDebug() << "Path: " << path;
-            //delete solver;
 
             targetNum = size - 1;
             for (int i = 0; i < path.size(); i++) {
@@ -106,12 +80,8 @@ void Manager::action()
                 }
             }
 
-            qDebug() << targetNum << objects.at(targetNum).coordX << objects.at(targetNum).coordY;
-
             robot->setParameter(0, objects.at(targetNum).coordX);
             robot->setParameter(1, objects.at(targetNum).coordY);
-
-            qDebug() << robot->getParameter(0) << robot->getParameter(1);
 
         } else if (size == 1) {
             robot->setParameter(0, objects.at(0).coordX);
@@ -124,9 +94,6 @@ void Manager::action()
                &&
                (robot->getParameter(1) + robot->getSize() / 2 >= robot->getCoords().second
                 && robot->getParameter(1) - robot->getSize() / 2 <= robot->getCoords().second)) {
-
-        //qDebug() << robot->getParameter(0) << robot->getCoords().first;
-        //qDebug() << robot->getParameter(1) << robot->getCoords().second;
 
         for (int i = 0; i < path.size(); i++) {
             if (path.at(i).first == targetNum && path.at(i).second != objects.size() - 1) {
@@ -159,17 +126,7 @@ void Manager::action()
     if (isnan(x) != 0)
         x = (x2 > x1) ? (x1 + robot->getParameter(2)) : (x1 - robot->getParameter(2));
 
-//    QFile file("log.txt");
-//    file.open(QIODevice::Append | QIODevice::WriteOnly | QIODevice::Text);
-//    QTextStream out(&file);
-//    //out << QString("Move to: %1 %2 | %3 %4").arg(x).arg(y).arg(static_cast<int>(x)).arg(static_cast<int>(y));
-//    out << QString("Target id: %1 | Robot params: %2 %3 | Target coords: %4 %5\n").
-//           arg(targetNum).arg(robot->getParameter(0)).arg(robot->getParameter(1)).
-//           arg(objects.at(targetNum).coordX).arg(objects.at(targetNum).coordY);
-//    file.close();
-
     robot->move(static_cast<int>(x), static_cast<int>(y));
-
 }
 
 void Manager::loadConfiguration(QString configurationFile)
@@ -279,6 +236,7 @@ void Manager::loadConfiguration(QString configurationFile)
     robot->turn(orientation);
     robot->changeDiameter(size);
     robot->changeColor(color.red(), color.green(), color.blue());
+    robot->setVisibilityRadius(visibilityRadius);
 
     for (int i = 0; i < CUSTOM_PARAMETERS_QUANTITY; i++) {
         robot->setParameter(i, parameters[i].second);

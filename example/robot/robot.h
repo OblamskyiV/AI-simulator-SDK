@@ -18,6 +18,7 @@ private:
     QColor color;                               //object's color
     unsigned int size;                          //diameter in special pixels (1/60 of real pixel)
     double orientation;                         //orientation (in degrees)
+    int visibilityRadius;                       //visibility radius
     Intersection intersection;                  //type of intersection
     std::pair<int, int> coords;                 //robot coordinates, first - x, second - y;
     std::pair<std::string, double> *parameters; //custom robot parameters
@@ -62,6 +63,11 @@ public:
         return orientation;
     }
 
+    int getVisibilityRadius()
+    {
+        return visibilityRadius;
+    }
+
     Intersection getIntersection()
     {
         return intersection;
@@ -87,6 +93,11 @@ public:
     }
 
     // setters
+
+    void setVisibilityRadius(int r)
+    {
+        visibilityRadius = r;
+    }
 
     void setPortNumber(unsigned int port)
     {
