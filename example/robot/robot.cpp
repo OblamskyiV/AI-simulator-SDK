@@ -103,11 +103,11 @@ std::vector<MessageObject> Robot::whoIsThere(unsigned int x, unsigned int y, uns
     network->send(&m);
 
     Message *msg = NULL;
-    std::vector<MessageObject> results;
+    std::vector<MessageObject> results = std::vector<MessageObject>();
     msg = waitForMessage();
     if (msg && msg->type == MsgThereYouSee) {
         MessageThereYouSee *m = static_cast<MessageThereYouSee *>(msg);
-        results.resize(m->objects.size());
+        //results.resize(m->objects.size());
         std::vector<MessageObject>::iterator it;
         for(it = m->objects.begin(); it < m->objects.end(); it++)
             results.push_back(*it);

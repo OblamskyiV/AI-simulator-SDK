@@ -21,6 +21,12 @@ private:
 
     Robot *robot;
     bool configurationLoaded;
+
+
+
+    int targetNum;
+    QVector<QPair<int, int> > path;
+    std::vector<MessageObject> objects;
 };
 
 #endif // MANAGER_H

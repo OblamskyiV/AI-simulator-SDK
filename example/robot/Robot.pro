@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     robot.cpp \
     manager.cpp \
     ../../NetworkingManager.cpp \
-    ../../messages-serializers.cpp
+    ../../messages-serializers.cpp \
+    algorithmsolver.cpp
 
 HEADERS += \
     robot.h \
@@ -24,4 +25,5 @@ HEADERS += \
     manager.h \
     ../../NetworkingManager.h \
     ../../messages.h \
-    ../../messages-serializers.h
+    ../../messages-serializers.h \
+    algorithmsolver.h

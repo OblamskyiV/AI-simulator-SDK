@@ -139,8 +139,8 @@ void Manager::loadConfiguration(QString configurationFile)
             }
         } else {
 
-            x = size + rand() % (mapSize.first - size);
-            y = size + rand() % (mapSize.second - size);
+            x = size + rand() % (mapSize.first - 4000);
+            y = size + rand() % (mapSize.second - 4000);
             std::cout << "Object " << obj <<
                          " receives random coordinates ( " << x << ", " << y << " )";
         }

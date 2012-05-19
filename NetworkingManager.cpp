@@ -116,10 +116,11 @@ Message* NetworkingManager::receive()
 
         quint32 count;
         stream >> count;
-        m->objects.reserve(count);
+        //m->objects.reserve(count);
         MessageObject obj;
         quint32 x, y, diameter, seconds;
         quint8 red, green, blue;
+        qDebug() << "Robot receives " << count << " objects";
         for(unsigned int i = 0; i < count; i++) {
             stream >> x >> y >> diameter >> seconds;
             stream >> red >> green >> blue;

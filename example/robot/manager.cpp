@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cmath>
 #include "manager.h"
+#include "algorithmsolver.h"
 
 Manager::Manager(QObject *parent, QString configurationFile) :
     QObject(parent)
@@ -15,13 +16,18 @@ Manager::Manager(QObject *parent, QString configurationFile) :
 
     configurationLoaded = false;
     loadConfiguration(configurationFile);
+
+    path = QVector<QPair<int, int> >();
+    targetNum = 0;
+
+    sleep(2);
 }
 
 void Manager::run()
 {
     if (configurationLoaded) {
-        //TODO: at this point we must process incoming messages from the simulator
-        action();
+        if(robot->getState() == Started)
+            action();
         QTimer::singleShot(PERFORM_ACTION_FREQUENCY, this, SLOT(run()));
     } else {
         std::cout << "Robot configuration is not loaded. " <<
@@ -32,33 +38,138 @@ void Manager::run()
 
 void Manager::action()
 {
-    //TODO: replace the code below by yours
+    if (path.size() == 0) {
+        objects = robot->whoIsThere(100500, 100500, 1488);
 
-    if(robot->getState() != Started)
-          return;
+        if (objects.size() == 0)
+            return;
 
-    srand(static_cast<unsigned>(time(0)));
+        std::cout << "Robot sees " << objects.size() << " objects\n";
 
-    if (fabs(robot->getCoords().first - robot->getParameter(0)) <
-            robot->getParameter(2)
-            && fabs(robot->getCoords().second - robot->getParameter(1)) <
-            robot->getParameter(2)) {
-        robot->setParameter(0, 300 + rand() % 23400);
-        robot->setParameter(1, 300 + rand() % 23400);
-    } else {
-        double x1 = robot->getCoords().first;
-        double y1 = robot->getCoords().second;
-        double x2 = robot->getParameter(0);
-        double y2 = robot->getParameter(1);
-        double y;
-        double part = fabs(robot->getParameter(2)) / sqrt(pow((x2 - x1) / (y2 - y1), 2) + 1);
-        if (part + y1 < y2)
-            y = part + y1;
-        else
-            y = y1 - part;
-        double x = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
-        robot->move(static_cast<int>(x), static_cast<int>(y));
+        const int size = objects.size() + 1;    //add robot's position
+        if (size >= 2) {
+            MessageObject me;
+            me.coordX = robot->getCoords().first;
+            me.coordY = robot->getCoords().second;
+            objects.push_back(me);
+
+            double **costMatrix = new double*[size];
+            for (int i = 0; i < size; i++) {
+                costMatrix[i] = new double[size];
+            }
+
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    if (i == j) {
+                        costMatrix[i][j] = std::numeric_limits<double>::infinity();
+                    } else {
+                        costMatrix[i][j] = sqrt(pow(static_cast<int>(objects.at(i).coordX
+                                                                     - objects.at(j).coordX), 2)
+                                                + pow(static_cast<int>(objects.at(i).coordY
+                                                                       - objects.at(j).coordY), 2));
+                    }
+                }
+            }
+
+            AlgorithmSolver *solver = new AlgorithmSolver(costMatrix, size);
+
+
+//            path.push_back(QPair<int, int>(4, 6));
+//            path.push_back(QPair<int, int>(1, 5));
+//            path.push_back(QPair<int, int>(5, 10));
+//            path.push_back(QPair<int, int>(10, 1));
+//            path.push_back(QPair<int, int>(6, 9));
+//            path.push_back(QPair<int, int>(8, 7));
+//            path.push_back(QPair<int, int>(9, 8));
+//            path.push_back(QPair<int, int>(0, 4));
+//            path.push_back(QPair<int, int>(3, 2));
+//            path.push_back(QPair<int, int>(2, 0));
+//            path.push_back(QPair<int, int>(7, 3));
+
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    printf("%7.2f | ", costMatrix[i][j]);
+                }
+                printf("\n");
+            }
+
+//            exit(0);
+            path = solver->solve();
+            qDebug() << "Path: " << path;
+            //delete solver;
+
+            targetNum = size - 1;
+            for (int i = 0; i < path.size(); i++) {
+                if (path.at(i).first == size - 1) {
+                    targetNum = path.at(i).second;
+                    break;
+                }
+            }
+
+            qDebug() << targetNum << objects.at(targetNum).coordX << objects.at(targetNum).coordY;
+
+            robot->setParameter(0, objects.at(targetNum).coordX);
+            robot->setParameter(1, objects.at(targetNum).coordY);
+
+            qDebug() << robot->getParameter(0) << robot->getParameter(1);
+
+        } else if (size == 1) {
+            robot->setParameter(0, objects.at(0).coordX);
+            robot->setParameter(1, objects.at(0).coordY);
+
+        } else
+            return;
+    } else if (path.size() > 0 && (robot->getParameter(0) + robot->getSize() / 2 >= robot->getCoords().first
+                && robot->getParameter(0) - robot->getSize() / 2 <= robot->getCoords().first)
+               &&
+               (robot->getParameter(1) + robot->getSize() / 2 >= robot->getCoords().second
+                && robot->getParameter(1) - robot->getSize() / 2 <= robot->getCoords().second)) {
+
+        //qDebug() << robot->getParameter(0) << robot->getCoords().first;
+        //qDebug() << robot->getParameter(1) << robot->getCoords().second;
+
+        for (int i = 0; i < path.size(); i++) {
+            if (path.at(i).first == targetNum && path.at(i).second != objects.size() - 1) {
+                targetNum = path.at(i).second;
+                break;
+            } else if (path.at(i).first == targetNum && path.at(i).second == objects.size() - 1) {
+                return;
+            }
+        }
+
+        robot->setParameter(0, objects.at(targetNum).coordX);
+        robot->setParameter(1, objects.at(targetNum).coordY);
     }
+
+    double x1 = robot->getCoords().first;
+    double y1 = robot->getCoords().second;
+    double x2 = robot->getParameter(0);
+    double y2 = robot->getParameter(1);
+    double y;
+    double x;
+
+    double part;
+    part = fabs(robot->getParameter(2)) / sqrt(pow((x2 - x1) / (y2 - y1), 2) + 1);
+    if (part + y1 < y2)
+        y = part + y1;
+    else
+        y = y1 - part;
+    x = (x2 - x1) * (y - y1) / (y2 - y1) + x1;
+
+    if (isnan(x) != 0)
+        x = (x2 > x1) ? (x1 + robot->getParameter(2)) : (x1 - robot->getParameter(2));
+
+//    QFile file("log.txt");
+//    file.open(QIODevice::Append | QIODevice::WriteOnly | QIODevice::Text);
+//    QTextStream out(&file);
+//    //out << QString("Move to: %1 %2 | %3 %4").arg(x).arg(y).arg(static_cast<int>(x)).arg(static_cast<int>(y));
+//    out << QString("Target id: %1 | Robot params: %2 %3 | Target coords: %4 %5\n").
+//           arg(targetNum).arg(robot->getParameter(0)).arg(robot->getParameter(1)).
+//           arg(objects.at(targetNum).coordX).arg(objects.at(targetNum).coordY);
+//    file.close();
+
+    robot->move(static_cast<int>(x), static_cast<int>(y));
+
 }
 
 void Manager::loadConfiguration(QString configurationFile)
